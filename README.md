@@ -35,7 +35,7 @@ For full step-by-step instructions, see [Detailed Submission Guide](./docs/submi
 |`kanker.nl`|Reliable patient and caregiver information|[More info](./sources/kanker.nl.md)|
 |[`iknl.nl`](https://www.iknl.nl)|Population-based, data-driven and scientific knowledge|[Info](./sources/iknl.nl.md)|
 |[`nkr-cijfers`](https://nkr-cijfers.iknl.nl)|Statistics and insights from the Netherlands Cancer Registry|[Info](./sources/nkr-cijfers.nl.md)|
-|`kankeratlas.iknl.nl`|Regional variation, incidence, and survival|[More info](./sources/kankeratlas.iknl.nl)|
+|[`cancer atlas`](https://kankeratlas.iknl.nl/)|Interactive map with regional incidence variation|[Info](./sources/kankeratlas.iknl.nl.md)|
 |`richtlijnendatabase.nl`|Oncology guidelines|[More info](./sources/richtlijnendatabase.nl.md)|
 |IKNL reports|Extensive analyses and big reports|[More info](./sources/iknl-report.md)|
 |[`scientific publications`](https://iknl.nl/onderzoek/publicaties)|Scientific articles and insight by IKNL researchers|[Info](./sources/publicaties.md)|
