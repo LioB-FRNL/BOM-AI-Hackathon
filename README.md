@@ -32,7 +32,7 @@ For full step-by-step instructions, see [Detailed Submission Guide](./docs/submi
 
 | Source | Description | Details |
 |--|--|--|
-|`kanker.nl`|Reliable patient and caregiver information|[More info](./sources/kanker.nl.md)|
+|[`kanker.nl`](https://www.kanker.nl/)|Reliable patient and caregiver information|[Info](./sources/kanker.nl.md)|
 |[`iknl.nl`](https://www.iknl.nl)|Population-based, data-driven and scientific knowledge|[Info](./sources/iknl.nl.md)|
 |[`nkr-cijfers`](https://nkr-cijfers.iknl.nl)|Statistics and insights from the Netherlands Cancer Registry|[Info](./sources/nkr-cijfers.nl.md)|
 |[`cancer atlas`](https://kankeratlas.iknl.nl/)|Interactive map with regional incidence variation|[Info](./sources/kankeratlas.iknl.nl.md)|
