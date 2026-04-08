@@ -1,4 +1,4 @@
-# nkr-cijfers
+# NKR Cijfers
 
 ## What is this source?
 IKNL (Integraal Kankercentrum Nederland) manages and maintains the Netherlands Cancer Registry (NCR); a population-based database about cancer in NL. IKNL is responsible for collecting, validating, analysing and disseminating this database.<br> The website https://nkr-cijfers.iknl.nl is one of the primary ways in which these data are made available to a broad audience. It presents the main national cancer statistics in an accessible and structured way.
@@ -9,7 +9,7 @@ The website provides:
 - Interactive tables and charts that allow users to explore data by tumour type, year, age, sex, and region
 - Aggregated, anonymised data suitable for public use, research, and policy support
 
-In short, [nkr-cijfers](https://nkr-cijfers.iknl.nl) offers direct insight into the core statistics of the Netherlands Cancer Registry, curated and published by IKNL for public access.
+In short, [NKR Cijfers](https://nkr-cijfers.iknl.nl) offers direct insight into the core statistics of the Netherlands Cancer Registry, curated and published by IKNL for public access.
 
 ## How to use the API of NKR Cijfers?
 In addition to the interactive website, NKR Cijfers offers a public API that provides programmatic access to the same aggregated statistics displayed on nkr‑cijfers.nl
