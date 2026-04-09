@@ -8,7 +8,7 @@ The platform is widely used in Dutch healthcare to support **clinical decisionâ€
 <br><br>
 
 ## Hackathon perspective: why this is an interesting source
-From a hackathon point of view, the Richtlijnendatabase is interesting because it represents **clinical knowledge** that could be combined with insights from IKNL.
+From a hackathon point of view, the Richtlijnendatabase is interesting because it represents **practical clinical treatment guidelines** that could be combined with insights from IKNL sources.
 
 Potential opportunities include:
 - Connecting guidelines to realâ€‘world data (e.g. cancer incidence, regional variation, ..)  
@@ -19,4 +19,4 @@ Potential opportunities include:
 
 ## Example guideline
 An example guideline that could be explored:
-[example guideline]
+https://richtlijnendatabase.nl/richtlijn/prostaatcarcinoom/prostaatcarcinoom_-_korte_beschrijving.html

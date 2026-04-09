@@ -1,3 +1,20 @@
+# Teams submissions 👋🤖
+
+Welcome to the **Teams** folder!
+
+This is where all hackathon teams share their ideas, prototypes, and experiments.  
+There’s no “perfect” submission — we’re looking for **creativity, curiosity, and collaboration**. 🚀
+
+If you’ve built something, explored a dataset, or even just sketched a strong idea:  
+✨ **this is the place to share it** ✨
+
+Each team adds a small folder with a README describing their concept. To keep things tidy and fair for everyone, please follow the submission guide below.
+
+<br>
+
+---
+<br>
+
 # Detailed Submission Guide
 
 Use this guide to submit your team idea via a Pull Request.

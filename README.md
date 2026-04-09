@@ -23,10 +23,10 @@ In this track, you’ll explore how AI can connect and unlock trusted knowledge 
 ## Submit Your Idea
 1. Fork this repository on GitHub.
 2. Create your team folder in `teams/<your_team>/`.
-3. Add your submission files (at least one `README.md` or `idea.md`).
+3. Add your submission files (at least one `README.md`).
 4. Open a Pull Request from your fork to this repository.
 
-For full step-by-step instructions, see [Detailed Submission Guide](./docs/submission-guide.md).
+For full step-by-step instructions, see [Detailed Submission Guide](./teams/README.md#detailed-submission-guide).
 
 ## Data Sources
 
