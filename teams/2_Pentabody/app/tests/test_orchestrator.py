@@ -157,3 +157,85 @@ def test_complete_fields_returns_final_with_summary(monkeypatch) -> None:
     ]
     assert fake_extractor.summary_inputs["structured_data"] is not None
     assert '"source": "nkr-cijfers"' in fake_extractor.summary_inputs["structured_data"][0]
+
+
+def test_short_fragment_answer_to_intent_question_is_not_reasked() -> None:
+    extracted = ExtractedQuery.model_validate(
+        {
+            "audience": "patient",
+            "intent": "treatment options",
+            "topic": "breast cancer",
+            "source_hint": "kanker.nl",
+            "missing_fields": [],
+        }
+    )
+
+    missing = orchestrator_mod._required_missing(
+        extracted,
+        [
+            {"role": "user", "content": "I have cancer"},
+            {
+                "role": "assistant",
+                "content": (
+                    "What would you like help with first: understanding diagnosis, "
+                    "treatment options, side effects, prognosis, or statistics?"
+                ),
+            },
+            {"role": "user", "content": "treatment options"},
+        ],
+    )
+
+    assert "intent" not in missing
+
+
+def test_followup_after_first_report_reuses_previous_profile_and_cancer_type(monkeypatch) -> None:
+    service = ChatService(
+        Settings(openai_api_key="fake", openai_model="gpt-4.1-mini", openai_timeout_seconds=30)
+    )
+    fake_extractor = FakeExtractor(
+        ExtractedQuery.model_validate(
+            {
+                "audience": "unknown",
+                "intent": "find survival statistics",
+                "topic": "unknown",
+                "source_hint": "nkr-cijfers",
+                "missing_fields": ["audience", "topic"],
+            }
+        ),
+        matched_cancer_type=None,
+    )
+    service._extractor = fake_extractor
+
+    previous_extracted = ExtractedQuery.model_validate(
+        {
+            "audience": "patient",
+            "intent": "understand treatment options",
+            "topic": "breast cancer",
+            "source_hint": "kanker.nl",
+            "missing_fields": [],
+        }
+    )
+
+    monkeypatch.setattr(orchestrator_mod, "extract", lambda: ["borstkanker", "longkanker"])
+    monkeypatch.setattr(orchestrator_mod, "grab_by_type", lambda kind: [f"text-for-{kind}"])
+    monkeypatch.setattr(
+        orchestrator_mod,
+        "get_survival_data",
+        lambda kind: {"source": "nkr-cijfers", "matched_kankersoort": {"code": kind}},
+    )
+
+    turn = service.next_assistant_turn(
+        [
+            {"role": "user", "content": "I have breast cancer and want treatment options."},
+            {"role": "assistant", "content": "initial report"},
+            {"role": "user", "content": "What about survival?"},
+        ],
+        previous_extracted=previous_extracted,
+        previous_matched_cancer_type="borstkanker",
+    )
+
+    assert turn.kind == "final"
+    assert turn.extracted is not None
+    assert turn.extracted.audience == "patient"
+    assert turn.extracted.topic == "breast cancer"
+    assert turn.matched_cancer_type == "borstkanker"

@@ -24,7 +24,12 @@ class ChatService:
                 timeout_seconds=settings.openai_timeout_seconds,
             )
 
-    def next_assistant_turn(self, history: list[dict[str, str]]) -> AssistantTurn:
+    def next_assistant_turn(
+        self,
+        history: list[dict[str, str]],
+        previous_extracted: ExtractedQuery | None = None,
+        previous_matched_cancer_type: str | None = None,
+    ) -> AssistantTurn:
         if not history:
             return AssistantTurn(
                 kind="question",
@@ -40,7 +45,7 @@ class ChatService:
                 ),
             )
 
-        extracted = self._extractor.extract_query(history)
+        extracted = self._merge_extracted(previous_extracted, self._extractor.extract_query(history))
         missing = _required_missing(extracted, history)
         if missing:
             return AssistantTurn(
@@ -52,6 +57,8 @@ class ChatService:
         route = self.route(extracted)
         cancer_types = extract()
         matched_cancer_type = self._extractor.match_cancer_type(extracted, cancer_types)
+        if not matched_cancer_type:
+            matched_cancer_type = previous_matched_cancer_type
         if not matched_cancer_type:
             return AssistantTurn(
                 kind="question",
@@ -100,24 +107,60 @@ class ChatService:
     def route(self, extracted: ExtractedQuery) -> RouteDecision:
         return route_extracted_query(extracted)
 
+    def _merge_extracted(
+        self,
+        previous: ExtractedQuery | None,
+        current: ExtractedQuery,
+    ) -> ExtractedQuery:
+        if previous is None:
+            return current
+
+        payload = current.model_dump()
+        previous_payload = previous.model_dump()
+
+        for field in ("audience", "intent", "topic", "source_hint", "notes"):
+            current_value = payload.get(field)
+            previous_value = previous_payload.get(field)
+            if _is_empty_profile_value(current_value) and not _is_empty_profile_value(previous_value):
+                payload[field] = previous_value
+
+        payload["missing_fields"] = sorted(
+            set(previous_payload.get("missing_fields", [])) | set(payload.get("missing_fields", []))
+        )
+
+        for field in ("audience", "intent", "topic", "source_hint"):
+            if not _is_empty_profile_value(payload.get(field)) and payload.get(field) != "unknown":
+                payload["missing_fields"] = [
+                    item for item in payload["missing_fields"] if item != field
+                ]
+
+        return ExtractedQuery.model_validate(payload)
+
 
 def _required_missing(extracted: ExtractedQuery, history: list[dict[str, str]]) -> list[str]:
     missing = set(extracted.missing_fields)
     if extracted.audience == "unknown":
         missing.add("audience")
-    if extracted.source_hint == "unknown":
-        missing.add("source_hint")
     if not extracted.intent.strip():
         missing.add("intent")
     if not extracted.topic.strip():
         missing.add("topic")
 
     user_text = _joined_user_text(history)
-    # Force explicit persona confirmation: diagnosis wording alone is not enough.
-    if "audience" not in missing and not _has_explicit_audience_signal(user_text):
+    latest_user_text = _latest_user_text(history)
+    latest_assistant_text = _latest_assistant_text(history)
+
+    if (
+        "audience" not in missing
+        and not _has_explicit_audience_signal(user_text)
+        and not _looks_like_answer_to_field(latest_assistant_text, latest_user_text, "audience")
+    ):
         missing.add("audience")
-    # Force explicit information need/goal before continuing to downstream summary.
-    if "intent" not in missing and not _has_explicit_goal_signal(user_text):
+    if (
+        "intent" not in missing
+        and not _has_explicit_goal_signal(user_text)
+        and not _looks_like_answer_to_field(latest_assistant_text, latest_user_text, "intent")
+    ):
         missing.add("intent")
 
     return sorted(missing)
@@ -155,14 +198,33 @@ def _joined_user_text(history: list[dict[str, str]]) -> str:
     return " ".join(msg.get("content", "") for msg in history if msg.get("role") == "user").lower()
 
 
+def _latest_user_text(history: list[dict[str, str]]) -> str:
+    for msg in reversed(history):
+        if msg.get("role") == "user":
+            return msg.get("content", "").strip().lower()
+    return ""
+
+
+def _latest_assistant_text(history: list[dict[str, str]]) -> str:
+    for msg in reversed(history):
+        if msg.get("role") == "assistant":
+            return msg.get("content", "").strip().lower()
+    return ""
+
+
 def _has_explicit_audience_signal(text: str) -> bool:
     patterns = [
         r"\bi am\b",
         r"\bi'm\b",
+        r"\bi have cancer\b",
+        r"\bi have .*cancer\b",
+        r"\bi was diagnosed with\b",
         r"\bfor myself\b",
         r"\bfor my\b",
         r"\bas a\b",
         r"\bik ben\b",
+        r"\bik heb kanker\b",
+        r"\bik heb .*kanker\b",
         r"\bvoor mezelf\b",
         r"\bvoor mijn\b",
         r"\bals\b",
@@ -179,6 +241,30 @@ def _has_explicit_goal_signal(text: str) -> bool:
         r"\b(wat|hoe|welke|wanneer|waarom)\b",
     ]
     return any(re.search(p, text) for p in patterns)
+
+
+def _looks_like_answer_to_field(previous_assistant: str, latest_user: str, field: str) -> bool:
+    if not previous_assistant or not latest_user:
+        return False
+    if len(latest_user) > 80:
+        return False
+
+    audience_markers = ["asking for yourself", "someone close", "healthcare", "policy professional"]
+    intent_markers = ["what would you like help with", "treatment options", "prognosis", "statistics"]
+
+    if field == "audience":
+        return any(marker in previous_assistant for marker in audience_markers)
+    if field == "intent":
+        return any(marker in previous_assistant for marker in intent_markers)
+    return False
+
+
+def _is_empty_profile_value(value: object) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return not value.strip() or value == "unknown"
+    return False
 
 
 def _build_profile_recap(extracted: ExtractedQuery, matched_cancer_type: str) -> str:
