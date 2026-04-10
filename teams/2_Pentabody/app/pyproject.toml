@@ -1,0 +1,30 @@
+[project]
+name = "pentabody-chatbot"
+version = "0.1.0"
+description = "Pentabody hackathon chatbot scaffold"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "openai>=1.75.0",
+  "pydantic>=2.7.0",
+  "python-dotenv>=1.0.1",
+  "streamlit>=1.44.0",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3.0",
+  "ruff>=0.11.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

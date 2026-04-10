@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.ruff_cache/
+
+# Virtual env / uv
+.venv/
+.uv/
+uv.lock
+
+# Streamlit
+.streamlit/
+
+# Local env
+.env
