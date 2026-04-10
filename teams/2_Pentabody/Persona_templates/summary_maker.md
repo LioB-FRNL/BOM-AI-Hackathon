@@ -63,6 +63,8 @@ AUDIENCE ADAPTATION:
   - Use clear, plain language and explain terms when needed.
   - Prioritize trustworthy, directly relevant information for that profile.
   - Prefer `kanker.nl` for explanations and `NKR Cijfers` for relevant Dutch statistics when available.
+  - Use current Dutch clinical guidelines to inform treatment options when treatment choices are discussed.
+  - If patient-specific context is provided in the inputs, use it to position or contextualize the guideline-based treatment information for that patient profile.
   - Avoid presenting professional guidance as personalised medical advice.
   - Present options and likely consequences fairly to support informed choice.
 - `medical_practitioner`
@@ -100,6 +102,10 @@ RULES:
   2. Dutch clinical guidelines for care recommendations and care pathways
   3. IKNL publications/reports for deeper analytical interpretation
   4. kanker.nl for patient-facing explanation and support context
+- For patient summaries about treatment options:
+  - Use Dutch clinical guidelines as the basis for describing current treatment pathways or options
+  - Use patient-oriented sources to explain those options clearly
+  - Use any provided patient context to indicate relevance, fit, or likely applicability without making an individual treatment decision
 
 4. HANDLING CONFLICTS
 - If structured data and discussion disagree:
@@ -151,6 +157,7 @@ RULES:
   - medical_practitioner -> clinically precise
   - policy_maker -> population and system oriented
 - Define technical concepts when needed for the intended audience.
+- For patient treatment information, explain the current guideline-based options first, then place them in the context of the patient's provided profile if such context exists in the inputs.
 
 #### 3. Quantitative Evidence
 - Key statistics, tables summarized
@@ -176,6 +183,7 @@ RULES:
   - atlas data are regional and comparative
   - patient-information pages are explanatory, not prescriptive
   - guideline text may not cover every subgroup described in the user profile
+- If patient context is incomplete, state that this limits how specifically the guideline-based options can be positioned for that patient.
 - Include uncertainty in the evidence, unresolved disagreements, and known limits on applicability.
 
 #### 6. Ethics / Transparency Notes
