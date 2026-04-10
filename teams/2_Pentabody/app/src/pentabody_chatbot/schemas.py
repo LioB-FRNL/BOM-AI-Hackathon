@@ -52,3 +52,7 @@ class AssistantTurn(BaseModel):
     message: str
     extracted: ExtractedQuery | None = None
     route: RouteDecision | None = None
+    matched_cancer_type: str | None = None
+    profile_recap_text: str | None = None
+    final_summary: str | None = None
+    needs_cancer_clarification: bool = False
