@@ -15,6 +15,34 @@ def test_extracted_query_valid() -> None:
     assert parsed.audience == "patient"
 
 
+def test_extracted_query_allows_age_and_gender_fields() -> None:
+    payload = {
+        "audience": "patient",
+        "intent": "understand treatment options",
+        "topic": "breast cancer",
+        "source_hint": "kanker.nl",
+        "age": None,
+        "gender": None,
+        "missing_fields": ["age", "gender"],
+    }
+    parsed = ExtractedQuery.model_validate(payload)
+    assert parsed.missing_fields == ["age", "gender"]
+
+
+def test_extracted_query_coerces_numeric_age_to_string() -> None:
+    payload = {
+        "audience": "patient",
+        "intent": "understand treatment options",
+        "topic": "breast cancer",
+        "source_hint": "kanker.nl",
+        "age": 25,
+        "gender": "female",
+        "missing_fields": [],
+    }
+    parsed = ExtractedQuery.model_validate(payload)
+    assert parsed.age == "25"
+
+
 def test_extracted_query_invalid_missing_intent() -> None:
     payload = {
         "audience": "patient",

@@ -30,6 +30,18 @@ def test_match_cancer_type_returns_valid_slug(monkeypatch) -> None:
     assert match == "prostaatkanker"
 
 
+def test_normalize_extraction_payload_fills_empty_object() -> None:
+    extractor = OpenAIExtractor(api_key="fake", model="gpt-4.1-mini", timeout_seconds=1)
+
+    payload = extractor._normalize_extraction_payload({})
+
+    assert payload["audience"] == "unknown"
+    assert payload["intent"] == "unknown"
+    assert payload["topic"] == "unknown"
+    assert payload["source_hint"] == "unknown"
+    assert payload["missing_fields"] == ["audience", "intent", "topic", "source_hint"]
+
+
 def test_audience_mapping_healthcare_professional_to_medical_practitioner() -> None:
     extractor = OpenAIExtractor(api_key="fake", model="gpt-4.1-mini", timeout_seconds=1)
     profile = extractor._build_profile(

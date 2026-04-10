@@ -37,6 +37,7 @@ class OpenAIExtractor:
             raise ValueError("Model returned empty output; expected JSON payload.")
 
         payload = json.loads(output_text)
+        payload = self._normalize_extraction_payload(payload)
         return ExtractedQuery.model_validate(payload)
 
     def match_cancer_type(self, extracted: ExtractedQuery, cancer_types: list[str]) -> str | None:
@@ -195,6 +196,44 @@ class OpenAIExtractor:
             cleaned = cleaned[: cleaned.index(marker) + len(marker)]
         return cleaned.strip()
 
+    def _normalize_extraction_payload(self, payload: object) -> dict[str, object]:
+        if not isinstance(payload, dict):
+            payload = {}
+
+        normalized = dict(payload)
+        defaults: dict[str, object] = {
+            "audience": "unknown",
+            "intent": "unknown",
+            "topic": "unknown",
+            "source_hint": "unknown",
+            "age": None,
+            "gender": None,
+            "missing_fields": [],
+            "notes": "",
+        }
+        for key, value in defaults.items():
+            normalized.setdefault(key, value)
+
+        missing_fields = normalized.get("missing_fields")
+        if not isinstance(missing_fields, list):
+            missing_fields = []
+
+        required_fields = ("audience", "intent", "topic", "source_hint")
+        for field in required_fields:
+            value = normalized.get(field)
+            if not isinstance(value, str) or not value.strip() or value == "unknown":
+                normalized[field] = "unknown"
+                if field not in missing_fields:
+                    missing_fields.append(field)
+
+        for field in ("age", "gender"):
+            value = normalized.get(field)
+            if value in ("", "unknown"):
+                normalized[field] = None
+
+        normalized["missing_fields"] = missing_fields
+        return normalized
+
     def _normalize_cancer_slug(self, raw: str) -> str:
         value = raw.strip().lower().strip("`\"' ")
         value = re.sub(r"[^a-z0-9\-]", "", value)
@@ -223,8 +262,8 @@ class OpenAIExtractor:
             "user_category": mapped_category,
             "expertise_level": expertise,
             "user_goal": extracted.intent,
-            "age": "unknown",
-            "gender": "unknown",
+            "age": extracted.age or "unknown",
+            "gender": extracted.gender or "unknown",
             "disease_type": matched_cancer_type,
         }
 

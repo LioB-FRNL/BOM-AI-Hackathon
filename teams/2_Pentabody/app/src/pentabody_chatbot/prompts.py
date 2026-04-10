@@ -35,6 +35,8 @@ APPLICATION ADAPTER:
   - intent
   - topic
   - source_hint
+  - age
+  - gender
   - missing_fields
   - notes
 - Allowed audience values:
@@ -59,11 +61,14 @@ APPLICATION ADAPTER:
   - intent
   - topic
   - source_hint
+  - age
+  - gender
 - Map prompt concepts to app fields as follows:
   - user_category -> audience
   - user_goal -> intent
   - disease_type -> topic
-- Age, gender, and expertise_level may inform inference or notes, but do not output them as top-level keys.
+- Output age and gender when the conversation provides them or when they can be inferred confidently from a clearly sex-specific cancer type.
+- Do not output expertise_level as a top-level key.
 - Never invent facts not present in the conversation.
 - If uncertain, set the field to "unknown" and include that field name in missing_fields.
 - Use the full conversation history, not just the latest user message.

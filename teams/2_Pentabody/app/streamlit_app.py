@@ -14,6 +14,12 @@ st.set_page_config(
 st.title("Trusted Cancer information")
 st.caption("Structured question narrowing + trusted source routing")
 
+
+def _reset_conversation() -> None:
+    st.session_state.history = []
+    st.session_state.last_extracted = None
+    st.session_state.last_matched_cancer_type = None
+
 settings = load_settings()
 chat_service = ChatService(settings)
 
@@ -49,8 +55,6 @@ if user_input:
     with st.chat_message("assistant"):
         st.markdown(turn.message)
 
-if st.button("Reset conversation"):
-    st.session_state.history = []
-    st.session_state.last_extracted = None
-    st.session_state.last_matched_cancer_type = None
+if st.button("Delete conversation and start over"):
+    _reset_conversation()
     st.rerun()

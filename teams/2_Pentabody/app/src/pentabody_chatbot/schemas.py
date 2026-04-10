@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 Audience = Literal[
@@ -34,10 +34,21 @@ class ExtractedQuery(BaseModel):
     intent: str = Field(min_length=1)
     topic: str = Field(min_length=1)
     source_hint: SourceHint
-    missing_fields: list[Literal["audience", "intent", "topic", "source_hint"]] = Field(
-        default_factory=list
-    )
+    age: str | None = None
+    gender: str | None = None
+    missing_fields: list[
+        Literal["audience", "intent", "topic", "source_hint", "age", "gender"]
+    ] = Field(default_factory=list)
     notes: str | None = None
+
+    @field_validator("age", "gender", mode="before")
+    @classmethod
+    def _coerce_optional_string(cls, value: object) -> object:
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return str(value)
+        return value
 
 
 class RouteDecision(BaseModel):

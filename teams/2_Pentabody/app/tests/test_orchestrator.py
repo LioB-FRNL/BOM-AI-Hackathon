@@ -41,6 +41,8 @@ def _valid_extracted() -> ExtractedQuery:
             "intent": "understand options",
             "topic": "colon cancer",
             "source_hint": "kanker.nl",
+            "age": "56",
+            "gender": "female",
             "missing_fields": [],
         }
     )
@@ -212,6 +214,8 @@ def test_followup_after_first_report_reuses_previous_profile_and_cancer_type(mon
             "intent": "understand treatment options",
             "topic": "breast cancer",
             "source_hint": "kanker.nl",
+            "age": "56",
+            "gender": "female",
             "missing_fields": [],
         }
     )

@@ -124,11 +124,17 @@ class ChatService:
             if _is_empty_profile_value(current_value) and not _is_empty_profile_value(previous_value):
                 payload[field] = previous_value
 
+        for field in ("age", "gender"):
+            current_value = payload.get(field)
+            previous_value = previous_payload.get(field)
+            if _is_empty_profile_value(current_value) and not _is_empty_profile_value(previous_value):
+                payload[field] = previous_value
+
         payload["missing_fields"] = sorted(
             set(previous_payload.get("missing_fields", [])) | set(payload.get("missing_fields", []))
         )
 
-        for field in ("audience", "intent", "topic", "source_hint"):
+        for field in ("audience", "intent", "topic", "source_hint", "age", "gender"):
             if not _is_empty_profile_value(payload.get(field)) and payload.get(field) != "unknown":
                 payload["missing_fields"] = [
                     item for item in payload["missing_fields"] if item != field
@@ -145,6 +151,11 @@ def _required_missing(extracted: ExtractedQuery, history: list[dict[str, str]]) 
         missing.add("intent")
     if not extracted.topic.strip():
         missing.add("topic")
+    if extracted.audience in {"patient", "caregiver"}:
+        if _is_empty_profile_value(extracted.age):
+            missing.add("age")
+        if _is_empty_profile_value(extracted.gender):
+            missing.add("gender")
 
     user_text = _joined_user_text(history)
     latest_user_text = _latest_user_text(history)
@@ -167,7 +178,7 @@ def _required_missing(extracted: ExtractedQuery, history: list[dict[str, str]]) 
 
 
 def _followup_question(missing_fields: list[str]) -> str:
-    priority = ["audience", "intent", "topic", "source_hint"]
+    priority = ["audience", "intent", "topic", "age", "gender", "source_hint"]
     for field in priority:
         if field in missing_fields:
             return _question_for_field(field)
@@ -187,6 +198,10 @@ def _question_for_field(field: str) -> str:
         )
     if field == "topic":
         return "Which cancer type is this about?"
+    if field == "age":
+        return "What is the patient's age?"
+    if field == "gender":
+        return "What is the patient's gender?"
     if field == "source_hint":
         return (
             "Do you prefer patient information, clinical guidelines, or statistics as the primary source?"
