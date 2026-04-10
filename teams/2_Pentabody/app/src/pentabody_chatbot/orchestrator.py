@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import re
 
 from parser.parse_kanker_nl import extract, grab_by_type
+from parser.parse_nkr_cijfers import get_survival_data
 
 from pentabody_chatbot.config import Settings
 from pentabody_chatbot.openai_client import OpenAIExtractor
@@ -75,11 +77,13 @@ class ChatService:
                 needs_cancer_clarification=True,
             )
 
+        structured_data = _build_structured_data_blocks(matched_cancer_type)
         final_summary = self._extractor.generate_summary(
             extracted=extracted,
             matched_cancer_type=matched_cancer_type,
             source_texts=source_texts,
             history=history,
+            structured_data=structured_data,
         )
         recap = _build_profile_recap(extracted, matched_cancer_type)
         final_message = f"{recap}\n\n{final_summary}"
@@ -186,3 +190,15 @@ def _build_profile_recap(extracted: ExtractedQuery, matched_cancer_type: str) ->
         f"- Topic: {extracted.topic}\n"
         f"- Matched cancer type: {matched_cancer_type}"
     )
+
+
+def _build_structured_data_blocks(matched_cancer_type: str) -> list[str]:
+    try:
+        survival_data = get_survival_data(matched_cancer_type)
+    except Exception:
+        return []
+
+    if not survival_data:
+        return []
+
+    return [json.dumps(survival_data, ensure_ascii=False, indent=2)]

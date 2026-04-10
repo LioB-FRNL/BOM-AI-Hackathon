@@ -83,6 +83,7 @@ def test_generate_summary_context_overflow_falls_back_to_chunked(monkeypatch) ->
         matched_cancer_type="prostaatkanker",
         source_texts=source_texts,
         history=[{"role": "user", "content": "help me"}],
+        structured_data=['{"source":"nkr-cijfers"}'],
     )
 
     assert output == "final-summary"

@@ -22,11 +22,14 @@ class FakeExtractor:
     def match_cancer_type(self, extracted, cancer_types):
         return self.matched_cancer_type
 
-    def generate_summary(self, extracted, matched_cancer_type, source_texts, history):
+    def generate_summary(
+        self, extracted, matched_cancer_type, source_texts, history, structured_data=None
+    ):
         self.summary_inputs = {
             "matched_cancer_type": matched_cancer_type,
             "source_texts": source_texts,
             "history": history,
+            "structured_data": structured_data,
         }
         return self.summary
 
@@ -128,6 +131,11 @@ def test_complete_fields_returns_final_with_summary(monkeypatch) -> None:
         "grab_by_type",
         lambda kind: [f"text-for-{kind}", "second-page"],
     )
+    monkeypatch.setattr(
+        orchestrator_mod,
+        "get_survival_data",
+        lambda kind: {"source": "nkr-cijfers", "matched_kankersoort": {"code": kind}},
+    )
 
     turn = service.next_assistant_turn(
         [
@@ -147,3 +155,5 @@ def test_complete_fields_returns_final_with_summary(monkeypatch) -> None:
         "text-for-prostaatkanker",
         "second-page",
     ]
+    assert fake_extractor.summary_inputs["structured_data"] is not None
+    assert '"source": "nkr-cijfers"' in fake_extractor.summary_inputs["structured_data"][0]

@@ -72,16 +72,19 @@ class OpenAIExtractor:
         matched_cancer_type: str,
         source_texts: list[str],
         history: list[dict[str, str]],
+        structured_data: list[str] | None = None,
     ) -> str:
         summary_prompt_template = SUMMARY_MAKER_PROMPT_PATH.read_text(encoding="utf-8")
         profile = self._build_profile(extracted=extracted, matched_cancer_type=matched_cancer_type)
         summary_prompt = self._render_summary_prompt(summary_prompt_template, profile)
         discussion_log = self._format_discussion_log(history)
         raw_context = self._format_source_context(source_texts)
+        raw_structured_data = self._format_structured_data(structured_data or [])
 
         user_payload = self._build_summary_user_payload(
             profile=profile,
             discussion_log=discussion_log,
+            structured_data=raw_structured_data,
             source_context=raw_context,
         )
 
@@ -95,6 +98,7 @@ class OpenAIExtractor:
             summary_prompt=summary_prompt,
             profile=profile,
             discussion_log=discussion_log,
+            structured_data=raw_structured_data,
             source_texts=source_texts,
         )
 
@@ -103,6 +107,7 @@ class OpenAIExtractor:
         summary_prompt: str,
         profile: dict[str, str],
         discussion_log: str,
+        structured_data: str,
         source_texts: list[str],
     ) -> str:
         chunks = self._chunk_source_texts(source_texts, max_chars=28000)
@@ -112,6 +117,7 @@ class OpenAIExtractor:
             chunk_payload = self._build_summary_user_payload(
                 profile=profile,
                 discussion_log=discussion_log,
+                structured_data=structured_data,
                 source_context=chunk,
             )
             chunk_payload += (
@@ -129,6 +135,7 @@ class OpenAIExtractor:
         final_payload = self._build_summary_user_payload(
             profile=profile,
             discussion_log=discussion_log,
+            structured_data=structured_data,
             source_context=merged_context,
         )
         final_payload += "\n\nFINAL MODE:\nSynthesize the final answer from these chunk digests."
@@ -232,10 +239,19 @@ class OpenAIExtractor:
     def _format_source_context(self, source_texts: list[str]) -> str:
         return "\n\n".join(f"Source excerpt {idx + 1}:\n{text}" for idx, text in enumerate(source_texts))
 
+    def _format_structured_data(self, structured_data: list[str]) -> str:
+        if not structured_data:
+            return "None"
+        return "\n\n".join(
+            f"Structured data block {idx + 1}:\n{block}"
+            for idx, block in enumerate(structured_data)
+        )
+
     def _build_summary_user_payload(
         self,
         profile: dict[str, str],
         discussion_log: str,
+        structured_data: str,
         source_context: str,
     ) -> str:
         return (
@@ -248,7 +264,9 @@ class OpenAIExtractor:
             f"- disease_type: {profile['disease_type']}\n\n"
             "DISCUSSION LOG:\n"
             f"{discussion_log}\n\n"
-            "STRUCTURED DATA / SOURCE TEXT:\n"
+            "STRUCTURED DATA:\n"
+            f"{structured_data}\n\n"
+            "SOURCE TEXT:\n"
             f"{source_context}"
         )
 
