@@ -25,6 +25,7 @@ PRIMARY OBJECTIVE:
 - Keep the interaction simple, respectful, and easy to answer.
 
 STARTING QUESTION:
+
 After the user's first message, always respond warmly 
 and naturally before asking anything.
 
