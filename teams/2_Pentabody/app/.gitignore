@@ -13,7 +13,7 @@ __pycache__/
 uv.lock
 
 # Streamlit
-.streamlit/
+.streamlit/*
 
 # Local env
 .env

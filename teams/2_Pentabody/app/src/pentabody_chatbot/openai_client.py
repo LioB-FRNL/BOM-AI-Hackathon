@@ -52,8 +52,9 @@ class OpenAIExtractor:
         for msg in history:
             role = msg.get("role", "user")
             content = msg.get("content", "")
+            content_type = "output_text" if role == "assistant" else "input_text"
             input_messages.append(
-                {"role": role, "content": [{"type": "input_text", "text": content}]}
+                {"role": role, "content": [{"type": content_type, "text": content}]}
             )
 
         return input_messages
